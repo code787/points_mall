@@ -1,0 +1,48 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+      - name: Build APK (release, split per ABI)
+        run: flutter build apk --release --split-per-abi
+
+      - name: Build APK (release, universal)
+        run: flutter build apk --release
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: points-mall-apk
+          path: build/app/outputs/flutter-apk/*.apk

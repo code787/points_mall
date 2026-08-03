@@ -8,6 +8,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../providers/feature_providers.dart';
 import '../../../widgets/empty_state.dart';
 import '../../../widgets/status_badge.dart';
+import 'points_application_screen.dart';
 
 class MyPointsScreen extends ConsumerWidget {
   const MyPointsScreen({super.key});
@@ -55,6 +56,16 @@ class MyPointsScreen extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.tonalIcon(
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const PointsApplicationScreen()),
+              );
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('申请积分（提交审核）'),
           ),
           const SizedBox(height: 24),
           Text('积分明细', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),

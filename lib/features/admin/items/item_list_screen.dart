@@ -51,6 +51,7 @@ class _ItemListScreenState extends ConsumerState<ItemListScreen> {
       confirmText: '确定',
     );
     if (deltaText == null || deltaText.trim().isEmpty) return;
+    if (!mounted) return;
     final delta = int.tryParse(deltaText.trim());
     if (delta == null || delta == 0) {
       showSnack(context, '请输入非 0 整数', isError: true);

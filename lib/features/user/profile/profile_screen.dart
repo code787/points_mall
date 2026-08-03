@@ -26,7 +26,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
     if (result == true && mounted) {
       await ref.read(authControllerProvider).refreshUser();
-      showSnack(context, '密码修改成功');
+      if (mounted) showSnack(context, '密码修改成功');
     }
   }
 
@@ -146,7 +146,7 @@ class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
   final _old = TextEditingController();
   final _new = TextEditingController();
   final _confirm = TextEditingController();
-  bool _obscure = true;
+  final bool _obscure = true;
   String? _error;
 
   @override

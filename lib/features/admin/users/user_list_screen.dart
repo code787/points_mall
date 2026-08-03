@@ -53,6 +53,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
   Future<void> _resetPassword(AppUser user) async {
     final newPassword = await promptDialog(context, title: '重置密码', hint: '输入新密码（至少 6 位）');
     if (newPassword == null || newPassword.trim().isEmpty) return;
+    if (!mounted) return;
     if (newPassword.length < 6) {
       showSnack(context, '密码至少 6 位', isError: true);
       return;
@@ -225,9 +226,9 @@ class _UserActionsSheet extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _ActionTile(icon: Icons.edit_outlined, label: '编辑资料', value: 'edit'),
-            _ActionTile(icon: Icons.add_circle_outline, label: '积分登记（加/扣分）', value: 'points'),
-            _ActionTile(icon: Icons.lock_reset, label: '重置密码', value: 'reset'),
+            const _ActionTile(icon: Icons.edit_outlined, label: '编辑资料', value: 'edit'),
+            const _ActionTile(icon: Icons.add_circle_outline, label: '积分登记（加/扣分）', value: 'points'),
+            const _ActionTile(icon: Icons.lock_reset, label: '重置密码', value: 'reset'),
             _ActionTile(
               icon: target == '停用' ? Icons.block : Icons.check_circle_outline,
               label: '$target用户',

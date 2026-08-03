@@ -85,7 +85,7 @@ class _PointsRegistrationScreenState extends ConsumerState<PointsRegistrationScr
                     ? users.where((u) => u.id == widget.preselectedUser!.id).toList()
                     : users.where((u) => !u.isAdmin).toList();
                 return DropdownButtonFormField<int>(
-                  value: _userId,
+                  initialValue: _userId,
                   decoration: const InputDecoration(
                     labelText: '目标用户',
                     prefixIcon: Icon(Icons.person_outline),

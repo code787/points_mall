@@ -90,7 +90,6 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(_isEdit ? '编辑用户' : '新增用户')),
       body: Form(
@@ -146,7 +145,7 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
               const SizedBox(height: 16),
             ],
             DropdownButtonFormField<UserRole>(
-              value: _role,
+              initialValue: _role,
               decoration: const InputDecoration(labelText: '角色', prefixIcon: Icon(Icons.admin_panel_settings_outlined)),
               items: [
                 for (final r in UserRole.values)

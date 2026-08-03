@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/enums.dart';
-import '../../../../data/models/redemption_request.dart';
 import '../../../../providers/feature_providers.dart';
 import '../../../../widgets/empty_state.dart';
 import '../../../../widgets/item_avatar.dart';

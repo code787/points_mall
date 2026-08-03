@@ -14,7 +14,6 @@ class MyOrdersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final user = ref.watch(currentUserProvider);
     final ordersAsync = ref.watch(userRedemptionRequestsProvider(user?.id ?? -1));
 

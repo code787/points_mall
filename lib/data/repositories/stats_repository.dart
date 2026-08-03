@@ -1,7 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../local/database_helper.dart';
-import '../models/enums.dart';
 import '../models/points_transaction.dart';
 import '../models/stats_summary.dart';
 import 'points_repository.dart';

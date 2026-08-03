@@ -17,7 +17,6 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final user = ref.watch(currentUserProvider);
     final statsAsync = ref.watch(statsProvider);
 

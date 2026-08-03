@@ -68,6 +68,14 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       appBar: AppBar(
         title: const Text('积分商城'),
         actions: [
+          IconButton(
+            tooltip: '刷新商品',
+            icon: const Icon(Icons.refresh),
+            onPressed: () async {
+              ref.invalidate(shopItemsProvider);
+              await ref.read(shopItemsProvider.future);
+            },
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: Center(
@@ -107,19 +115,26 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
               subtitle: '管理员尚未上架可兑换物品',
             );
           }
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.82,
-            ),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return _ItemCard(item: item, onTap: () => _showItemDetail(item));
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(shopItemsProvider);
+              await ref.read(shopItemsProvider.future);
             },
+            child: GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.82,
+              ),
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return _ItemCard(item: item, onTap: () => _showItemDetail(item));
+              },
+            ),
           );
         },
       ),

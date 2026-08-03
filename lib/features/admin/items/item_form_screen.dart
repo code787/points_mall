@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/validators.dart';
 import '../../../data/models/enums.dart';
 import '../../../data/models/mall_item.dart';
+import '../../../providers/feature_providers.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../widgets/confirm_dialog.dart';
 
@@ -83,6 +84,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
           emoji: _emoji,
           color: _color,
         );
+        ref.invalidate(itemsProvider);
+        ref.invalidate(shopItemsProvider);
         if (mounted) {
           showSnack(context, '创建成功');
           Navigator.of(context).pop(true);

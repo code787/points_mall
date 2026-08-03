@@ -21,7 +21,8 @@ class ItemListScreen extends ConsumerStatefulWidget {
 class _ItemListScreenState extends ConsumerState<ItemListScreen> {
   Future<void> _refresh() async {
     ref.invalidate(itemsProvider);
-    await ref.read(itemsProvider.future);
+    ref.invalidate(shopItemsProvider);
+    await Future.wait([ref.read(itemsProvider.future), ref.read(shopItemsProvider.future)]);
   }
 
   Future<void> _openActions(MallItem item) async {

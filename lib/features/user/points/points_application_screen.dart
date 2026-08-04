@@ -5,6 +5,7 @@ import '../../../core/utils/validators.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/feature_providers.dart';
 import '../../../providers/repository_providers.dart';
+import '../../../data/sync/sync_lock_monitor.dart';
 import '../../../widgets/confirm_dialog.dart';
 
 class PointsApplicationScreen extends ConsumerStatefulWidget {
@@ -56,6 +57,7 @@ class _PointsApplicationScreenState extends ConsumerState<PointsApplicationScree
 
   @override
   Widget build(BuildContext context) {
+    final lockState = ref.watch(syncLockProvider);
     final theme = Theme.of(context);
     final user = ref.watch(currentUserProvider);
 
@@ -90,7 +92,7 @@ class _PointsApplicationScreenState extends ConsumerState<PointsApplicationScree
             ),
             const SizedBox(height: 8),
             FilledButton(
-              onPressed: _saving ? null : _submit,
+              onPressed: _saving || lockState.isLockedByOther ? null : _submit,
               child: _saving
                   ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
                   : const Text('提交申请'),

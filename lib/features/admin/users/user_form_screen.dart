@@ -6,6 +6,7 @@ import '../../../data/models/app_user.dart';
 import '../../../data/models/enums.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/repository_providers.dart';
+import '../../../data/sync/sync_lock_monitor.dart';
 import '../../../widgets/confirm_dialog.dart';
 
 class UserFormScreen extends ConsumerStatefulWidget {
@@ -90,6 +91,7 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lockState = ref.watch(syncLockProvider);
     return Scaffold(
       appBar: AppBar(title: Text(_isEdit ? '编辑用户' : '新增用户')),
       body: Form(
@@ -155,17 +157,19 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
             ),
             if (_isEdit) ...[
               const SizedBox(height: 16),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('账号状态'),
-                subtitle: Text(_status.label),
-                value: _status == UserStatus.active,
-                onChanged: (v) => setState(() => _status = v ? UserStatus.active : UserStatus.disabled),
-              ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('账号状态'),
+              subtitle: Text(_status.label),
+              value: _status == UserStatus.active,
+              onChanged: lockState.isLockedByOther
+                  ? null
+                  : (v) => setState(() => _status = v ? UserStatus.active : UserStatus.disabled),
+            ),
             ],
             const SizedBox(height: 24),
             FilledButton(
-              onPressed: _saving ? null : _save,
+              onPressed: (_saving || lockState.isLockedByOther) ? null : _save,
               child: _saving
                   ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
                   : Text(_isEdit ? '保存' : '创建用户'),

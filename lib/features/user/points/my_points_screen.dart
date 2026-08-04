@@ -6,6 +6,7 @@ import '../../../data/models/enums.dart';
 import '../../../data/models/points_transaction.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/feature_providers.dart';
+import '../../../data/sync/sync_lock_monitor.dart';
 import '../../../widgets/empty_state.dart';
 import '../../../widgets/status_badge.dart';
 import 'points_application_screen.dart';
@@ -15,6 +16,7 @@ class MyPointsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final lockState = ref.watch(syncLockProvider);
     final theme = Theme.of(context);
     final user = ref.watch(currentUserProvider);
     final txAsync = ref.watch(userPointsTransactionsProvider(user?.id ?? -1));
@@ -59,7 +61,7 @@ class MyPointsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           FilledButton.tonalIcon(
-            onPressed: () async {
+            onPressed: lockState.isLockedByOther ? null : () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const PointsApplicationScreen()),
               );

@@ -23,7 +23,6 @@ Future<void> _autoSync() async {
     if (config.isConfigured) {
       await syncService.startSession(config);
       await syncService.importData(config);
-      // Lock stays alive via heartbeat, released when app closes
     }
   } catch (e) {
     // Ignore auto-sync errors

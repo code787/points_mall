@@ -6,6 +6,7 @@ import '../../../data/models/app_user.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/feature_providers.dart';
 import '../../../providers/repository_providers.dart';
+import '../../../data/sync/sync_lock_monitor.dart';
 import '../../../widgets/confirm_dialog.dart';
 
 class PointsRegistrationScreen extends ConsumerStatefulWidget {
@@ -75,6 +76,7 @@ class _PointsRegistrationScreenState extends ConsumerState<PointsRegistrationScr
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final usersAsync = ref.watch(usersProvider);
+    final lockState = ref.watch(syncLockProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('积分登记')),
@@ -137,7 +139,7 @@ class _PointsRegistrationScreenState extends ConsumerState<PointsRegistrationScr
             ),
             const SizedBox(height: 8),
             FilledButton(
-              onPressed: _saving ? null : _submit,
+              onPressed: (_saving || lockState.isLockedByOther) ? null : _submit,
               child: _saving
                   ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
                   : const Text('提交登记'),

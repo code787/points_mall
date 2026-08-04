@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../data/sync/sync_lock_monitor.dart';
 import '../../../data/sync/webdav_sync_service.dart';
 import '../../../main.dart' show syncService;
 import '../../../providers/auth_provider.dart';
@@ -125,6 +126,7 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lockState = ref.watch(syncLockProvider);
     final theme = Theme.of(context);
     final configured = _config?.isConfigured ?? false;
 
@@ -193,7 +195,7 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: configured ? _export : _openConfig,
+                onPressed: lockState.isLockedByOther ? null : (configured ? _export : _openConfig),
                 icon: const Icon(Icons.cloud_upload_outlined),
                 label: Text(configured ? '上传到坚果云' : '配置坚果云'),
               ),

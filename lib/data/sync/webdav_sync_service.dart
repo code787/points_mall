@@ -53,7 +53,7 @@ class WebDAVSyncService {
   Timer? _heartbeatTimer;
   String? _currentDeviceId;
 
-  Future<String> _getDeviceId() async {
+  Future<String> getDeviceId() async {
     if (_currentDeviceId != null) return _currentDeviceId!;
     final prefs = await SharedPreferences.getInstance();
     var id = prefs.getString(_keyDeviceId);
@@ -137,7 +137,7 @@ class WebDAVSyncService {
   }
 
   Future<void> _acquireLock(WebDAVConfig config) async {
-    final deviceId = await _getDeviceId();
+    final deviceId = await getDeviceId();
     final lock = SyncLock(deviceId: deviceId, timestamp: DateTime.now().millisecondsSinceEpoch);
     final url = Uri.parse('${_normalizeUrl(config.url)}$_syncFolder/$_lockFile');
     final headers = Map<String, String>.from(_authHeaders(config))
@@ -146,7 +146,7 @@ class WebDAVSyncService {
   }
 
   Future<void> _updateLock(WebDAVConfig config) async {
-    final deviceId = await _getDeviceId();
+    final deviceId = await getDeviceId();
     final lock = SyncLock(deviceId: deviceId, timestamp: DateTime.now().millisecondsSinceEpoch);
     final url = Uri.parse('${_normalizeUrl(config.url)}$_syncFolder/$_lockFile');
     final headers = Map<String, String>.from(_authHeaders(config))
@@ -156,7 +156,7 @@ class WebDAVSyncService {
 
   Future<void> _releaseLock(WebDAVConfig config) async {
     try {
-      final deviceId = await _getDeviceId();
+      final deviceId = await getDeviceId();
       final existing = await checkLock(config);
       if (existing != null && existing.deviceId == deviceId) {
         final url = Uri.parse('${_normalizeUrl(config.url)}$_syncFolder/$_lockFile');

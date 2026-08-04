@@ -5,6 +5,7 @@ import '../../../data/models/app_user.dart';
 import '../../../data/models/enums.dart';
 import '../../../providers/feature_providers.dart';
 import '../../../providers/repository_providers.dart';
+import '../../../data/sync/sync_lock_monitor.dart';
 import '../../../widgets/confirm_dialog.dart';
 import '../../../widgets/empty_state.dart';
 import '../../../widgets/item_avatar.dart';
@@ -82,6 +83,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final usersAsync = ref.watch(usersProvider);
+    final lockState = ref.watch(syncLockProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -90,10 +92,12 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
           IconButton(
             tooltip: '新增用户',
             icon: const Icon(Icons.person_add_alt_1_outlined),
-            onPressed: () async {
-              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const UserFormScreen()));
-              _refresh();
-            },
+            onPressed: lockState.isLockedByOther
+                ? null
+                : () async {
+                    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const UserFormScreen()));
+                    _refresh();
+                  },
           ),
           const SizedBox(width: 4),
         ],

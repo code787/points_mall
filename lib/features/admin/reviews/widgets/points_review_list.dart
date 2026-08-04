@@ -7,6 +7,7 @@ import '../../../../providers/auth_provider.dart';
 import '../../../../providers/feature_providers.dart';
 import '../../../../providers/repository_providers.dart';
 import '../../../../widgets/confirm_dialog.dart';
+import '../../../../data/sync/sync_lock_monitor.dart';
 import '../../../../widgets/empty_state.dart';
 
 class PointsReviewList extends ConsumerWidget {
@@ -52,6 +53,7 @@ class PointsReviewList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final listAsync = ref.watch(pendingPointsProvider);
+    final lockState = ref.watch(syncLockProvider);
 
     return listAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -124,7 +126,9 @@ class PointsReviewList extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: () => _handle(ref, tx, false),
+                                onPressed: lockState.isLockedByOther
+                                    ? null
+                                    : () => _handle(ref, tx, false),
                                 icon: const Icon(Icons.close),
                                 label: const Text('驳回'),
                                 style: OutlinedButton.styleFrom(
@@ -136,7 +140,9 @@ class PointsReviewList extends ConsumerWidget {
                             const SizedBox(width: 12),
                             Expanded(
                               child: FilledButton.icon(
-                                onPressed: () => _handle(ref, tx, true),
+                                onPressed: lockState.isLockedByOther
+                                    ? null
+                                    : () => _handle(ref, tx, true),
                                 icon: const Icon(Icons.check),
                                 label: const Text('通过'),
                                 style: FilledButton.styleFrom(

@@ -5,6 +5,7 @@ import '../../../data/models/enums.dart';
 import '../../../data/models/mall_item.dart';
 import '../../../providers/feature_providers.dart';
 import '../../../providers/repository_providers.dart';
+import '../../../data/sync/sync_lock_monitor.dart';
 import '../../../widgets/confirm_dialog.dart';
 import '../../../widgets/empty_state.dart';
 import '../../../widgets/item_avatar.dart';
@@ -81,6 +82,7 @@ class _ItemListScreenState extends ConsumerState<ItemListScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final itemsAsync = ref.watch(itemsProvider);
+    final lockState = ref.watch(syncLockProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -89,10 +91,12 @@ class _ItemListScreenState extends ConsumerState<ItemListScreen> {
           IconButton(
             tooltip: '新增物品',
             icon: const Icon(Icons.add_box_outlined),
-            onPressed: () async {
-              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ItemFormScreen()));
-              _refresh();
-            },
+            onPressed: lockState.isLockedByOther
+                ? null
+                : () async {
+                    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ItemFormScreen()));
+                    _refresh();
+                  },
           ),
           const SizedBox(width: 4),
         ],

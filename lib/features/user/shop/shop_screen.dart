@@ -8,6 +8,7 @@ import '../../../providers/feature_providers.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../widgets/confirm_dialog.dart';
 import '../../../widgets/empty_state.dart';
+import '../../../data/sync/sync_lock_monitor.dart';
 import '../../../widgets/item_avatar.dart';
 
 class ShopScreen extends ConsumerStatefulWidget {
@@ -235,6 +236,7 @@ class _RedeemSheetState extends ConsumerState<_RedeemSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final item = widget.item;
+    final lockState = ref.watch(syncLockProvider);
     final user = ref.watch(currentUserProvider);
     final userPoints = user?.points ?? 0;
     final total = item.pointsCost * _quantity;
@@ -347,7 +349,7 @@ class _RedeemSheetState extends ConsumerState<_RedeemSheet> {
           ],
           const SizedBox(height: 20),
           FilledButton(
-            onPressed: widget.submitting || insufficient ? null : () => widget.onSubmit(item, _quantity),
+            onPressed: widget.submitting || insufficient || lockState.isLockedByOther ? null : () => widget.onSubmit(item, _quantity),
             child: widget.submitting
                 ? const SizedBox(
                     width: 22,

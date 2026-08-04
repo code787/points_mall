@@ -7,6 +7,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../widgets/confirm_dialog.dart';
 import '../../../widgets/item_avatar.dart';
+import '../../../data/sync/sync_lock_monitor.dart';
 import '../../../widgets/status_badge.dart';
 import 'sync_screen.dart';
 
@@ -40,6 +41,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lockState = ref.watch(syncLockProvider);
     final theme = Theme.of(context);
     final user = ref.watch(currentUserProvider);
 
@@ -111,7 +113,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   leading: const Icon(Icons.lock_outline),
                   title: const Text('修改密码'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: _changePassword,
+                  onTap: lockState.isLockedByOther ? null : _changePassword,
                 ),
                 const Divider(indent: 16, endIndent: 16),
                 ListTile(

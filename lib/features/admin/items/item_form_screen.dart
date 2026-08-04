@@ -7,6 +7,7 @@ import '../../../data/models/enums.dart';
 import '../../../data/models/mall_item.dart';
 import '../../../providers/feature_providers.dart';
 import '../../../providers/repository_providers.dart';
+import '../../../data/sync/sync_lock_monitor.dart';
 import '../../../widgets/confirm_dialog.dart';
 
 class ItemFormScreen extends ConsumerStatefulWidget {
@@ -101,6 +102,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final lockState = ref.watch(syncLockProvider);
     return Scaffold(
       appBar: AppBar(title: Text(_isEdit ? '编辑物品' : '新增物品')),
       body: Form(
@@ -223,18 +225,20 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             ),
             if (_isEdit) ...[
               const SizedBox(height: 8),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('上架状态'),
-                subtitle: Text(_status.label),
-                value: _status == ItemStatus.active,
-                onChanged: (v) =>
-                    setState(() => _status = v ? ItemStatus.active : ItemStatus.inactive),
-              ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('上架状态'),
+              subtitle: Text(_status.label),
+              value: _status == ItemStatus.active,
+              onChanged: lockState.isLockedByOther
+                  ? null
+                  : (v) =>
+                      setState(() => _status = v ? ItemStatus.active : ItemStatus.inactive),
+            ),
             ],
             const SizedBox(height: 16),
             FilledButton(
-              onPressed: _saving ? null : _save,
+              onPressed: (_saving || lockState.isLockedByOther) ? null : _save,
               child: _saving
                   ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
                   : Text(_isEdit ? '保存' : '创建物品'),

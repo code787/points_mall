@@ -66,13 +66,13 @@ class WebDAVSyncService {
     return client;
   }
 
-  Future<bool> testConnection(WebDAVConfig config) async {
+  Future<String?> testConnection(WebDAVConfig config) async {
     try {
       final client = _createClient(config);
       await client.ping();
-      return true;
-    } catch (_) {
-      return false;
+      return null;
+    } catch (e) {
+      return e.toString();
     }
   }
 

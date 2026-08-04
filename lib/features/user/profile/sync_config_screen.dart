@@ -43,9 +43,13 @@ class _SyncConfigScreenState extends State<SyncConfigScreen> {
         username: _usernameController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      final ok = await _syncService.testConnection(config);
+      final error = await _syncService.testConnection(config);
       if (mounted) {
-        showSnack(context, ok ? '连接成功' : '连接失败，请检查配置', isError: !ok);
+        if (error == null) {
+          showSnack(context, '连接成功');
+        } else {
+          showSnack(context, '连接失败: $error', isError: true);
+        }
       }
     } catch (e) {
       if (mounted) showSnack(context, '测试失败: $e', isError: true);

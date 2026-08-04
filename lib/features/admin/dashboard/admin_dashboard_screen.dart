@@ -12,6 +12,8 @@ import '../../../widgets/confirm_dialog.dart';
 import '../../../widgets/empty_state.dart';
 import '../../../widgets/stat_card.dart';
 
+import '../../user/profile/sync_screen.dart';
+
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
 
@@ -24,6 +26,13 @@ class AdminDashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('数据看板'),
         actions: [
+          IconButton(
+            tooltip: '数据同步',
+            icon: const Icon(Icons.sync_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SyncScreen()),
+            ),
+          ),
           IconButton(
             tooltip: '退出登录',
             icon: const Icon(Icons.logout),

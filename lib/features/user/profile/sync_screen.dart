@@ -24,6 +24,12 @@ class _SyncScreenState extends State<SyncScreen> {
     _loadStatus();
   }
 
+  @override
+  void dispose() {
+    _syncService.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadStatus() async {
     final config = await _syncService.loadConfig();
     final lastSync = await _syncService.getLastSyncTime();
@@ -38,6 +44,18 @@ class _SyncScreenState extends State<SyncScreen> {
       await _openConfig();
       return;
     }
+
+    // Check lock
+    final lock = await _syncService.checkLock(_config!);
+    if (lock != null) {
+      if (mounted) {
+        final remaining = _syncService.remainingMinutes(lock);
+        showSnack(context, '其他设备正在同步，请$remaining分钟后再试', isError: true);
+      }
+      return;
+    }
+
+    if (!mounted) return;
     final ok = await confirmDialog(
       context,
       title: '上传数据',
@@ -66,6 +84,18 @@ class _SyncScreenState extends State<SyncScreen> {
       await _openConfig();
       return;
     }
+
+    // Check lock
+    final lock = await _syncService.checkLock(_config!);
+    if (lock != null) {
+      if (mounted) {
+        final remaining = _syncService.remainingMinutes(lock);
+        showSnack(context, '其他设备正在同步，请$remaining分钟后再试', isError: true);
+      }
+      return;
+    }
+
+    if (!mounted) return;
     final ok = await confirmDialog(
       context,
       title: '下载数据',

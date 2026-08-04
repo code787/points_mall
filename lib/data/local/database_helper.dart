@@ -14,6 +14,16 @@ class DatabaseHelper {
     return _db!;
   }
 
+  Future<String> get dbPath async {
+    final dir = await getDatabasesPath();
+    return p.join(dir, AppConstants.dbFileName);
+  }
+
+  Future<void> close() async {
+    await _db?.close();
+    _db = null;
+  }
+
   Future<Database> _open() async {
     final dbPath = await getDatabasesPath();
     final path = p.join(dbPath, AppConstants.dbFileName);

@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:webdav_client/webdav_client.dart' as webdav;
 
 import '../local/database_helper.dart';
 
@@ -26,8 +24,8 @@ class WebDAVSyncService {
   static const _keyUsername = 'webdav_username';
   static const _keyPassword = 'webdav_password';
   static const _keyLastSync = 'webdav_last_sync';
-  static const _syncFolder = '/points_mall_sync';
-  static const _syncFile = '/points_mall_sync/mall_data.json';
+  static const _syncFolder = 'points_mall_sync';
+  static const _syncFile = 'mall_data.json';
 
   Future<WebDAVConfig> loadConfig() async {
     final prefs = await SharedPreferences.getInstance();
@@ -56,21 +54,24 @@ class WebDAVSyncService {
     await prefs.setInt(_keyLastSync, DateTime.now().millisecondsSinceEpoch);
   }
 
-  webdav.Client _createClient(WebDAVConfig config) {
-    final client = webdav.newClient(
-      config.url,
-      user: config.username,
-      password: config.password,
-    );
-    client.setConnectTimeout(30000);
-    return client;
+  String _normalizeUrl(String url) => url.endsWith('/') ? url : '$url/';
+
+  Map<String, String> _authHeaders(WebDAVConfig config) {
+    final credentials = base64Encode(utf8.encode('${config.username}:${config.password}'));
+    return {
+      'Authorization': 'Basic $credentials',
+      'Content-Type': 'application/json; charset=utf-8',
+    };
   }
 
   Future<String?> testConnection(WebDAVConfig config) async {
     try {
-      final client = _createClient(config);
-      await client.ping();
-      return null;
+      final url = Uri.parse(_normalizeUrl(config.url));
+      final response = await http.get(url, headers: _authHeaders(config)).timeout(const Duration(seconds: 15));
+      if (response.statusCode == 200 || response.statusCode == 207 || response.statusCode == 401) {
+        return response.statusCode == 401 ? '用户名或密码错误' : null;
+      }
+      return 'HTTP ${response.statusCode}';
     } catch (e) {
       return e.toString();
     }
@@ -81,41 +82,41 @@ class WebDAVSyncService {
 
     final db = await DatabaseHelper.instance.database;
     final data = <String, dynamic>{};
-
     data['users'] = await db.query('users');
     data['items'] = await db.query('items');
     data['points_transactions'] = await db.query('points_transactions');
     data['redemption_requests'] = await db.query('redemption_requests');
 
     final json = jsonEncode(data);
+    final body = utf8.encode(json);
 
-    final tempDir = await getTemporaryDirectory();
-    final tempFile = File('${tempDir.path}/mall_data_sync.json');
-    await tempFile.writeAsString(json);
+    final baseUrl = _normalizeUrl(config.url);
+    final folderUrl = Uri.parse('$baseUrl$_syncFolder/');
+    final fileUrl = Uri.parse('$baseUrl$_syncFolder/$_syncFile');
+    final headers = _authHeaders(config);
 
-    final client = _createClient(config);
-    await client.mkdir(_syncFolder);
-    await client.writeFromFile(
-      _syncFile,
-      tempFile.path,
-    );
+    final mkResponse = await http.Request('MKCOL', folderUrl).send();
+    await mkResponse.stream.drain();
 
-    await tempFile.delete();
+    final putResponse = await http.put(fileUrl, headers: headers, body: body).timeout(const Duration(seconds: 30));
+    if (putResponse.statusCode != 200 && putResponse.statusCode != 201 && putResponse.statusCode != 204) {
+      throw Exception('上传失败: HTTP ${putResponse.statusCode}');
+    }
+
     await _updateLastSyncTime();
   }
 
   Future<void> importData(WebDAVConfig config) async {
     if (!config.isConfigured) throw Exception('请先配置坚果云账号');
 
-    final tempDir = await getTemporaryDirectory();
-    final tempFile = File('${tempDir.path}/mall_data_sync.json');
+    final fileUrl = Uri.parse('${_normalizeUrl(config.url)}$_syncFolder/$_syncFile');
+    final response = await http.get(fileUrl, headers: _authHeaders(config)).timeout(const Duration(seconds: 30));
 
-    final client = _createClient(config);
-    await client.read2File(_syncFile, tempFile.path);
+    if (response.statusCode != 200) {
+      throw Exception('下载失败: HTTP ${response.statusCode}');
+    }
 
-    final jsonStr = await tempFile.readAsString();
-    final json = jsonDecode(jsonStr) as Map<String, dynamic>;
-
+    final json = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     final db = await DatabaseHelper.instance.database;
 
     await db.transaction((txn) async {
@@ -138,22 +139,6 @@ class WebDAVSyncService {
       }
     });
 
-    await tempFile.delete();
     await _updateLastSyncTime();
-  }
-
-  Future<void> fullSync(WebDAVConfig config) async {
-    if (!config.isConfigured) throw Exception('请先配置坚果云账号');
-
-    final client = _createClient(config);
-    try {
-      final items = await client.readDir(_syncFolder);
-      if (items.isNotEmpty) {
-        await importData(config);
-        return;
-      }
-    } catch (_) {}
-
-    await exportData(config);
   }
 }

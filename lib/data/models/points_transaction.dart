@@ -7,6 +7,7 @@ class PointsTransaction {
     required this.amount,
     required this.type,
     required this.status,
+    this.source = PointsTxSource.user,
     this.note,
     this.operatorId,
     required this.createdAt,
@@ -19,11 +20,14 @@ class PointsTransaction {
   final int amount;
   final PointsTxType type;
   final ReviewStatus status;
+  final PointsTxSource source;
   final String? note;
   final int? operatorId;
   final DateTime createdAt;
   final DateTime? reviewedAt;
   final String? userName;
+
+  String get displayLabel => source == PointsTxSource.user ? '积分申请' : type.label;
 
   PointsTransaction copyWith({ReviewStatus? status, DateTime? reviewedAt, int? operatorId}) {
     return PointsTransaction(
@@ -32,6 +36,7 @@ class PointsTransaction {
       amount: amount,
       type: type,
       status: status ?? this.status,
+      source: source,
       note: note,
       operatorId: operatorId ?? this.operatorId,
       createdAt: createdAt,
@@ -46,6 +51,9 @@ class PointsTransaction {
         amount: map['amount'] as int,
         type: PointsTxType.values.byName(map['type'] as String),
         status: ReviewStatus.values.byName(map['status'] as String),
+        source: map['source'] == null
+            ? PointsTxSource.user
+            : PointsTxSource.values.byName(map['source'] as String),
         note: map['note'] as String?,
         operatorId: map['operator_id'] as int?,
         createdAt: DateTime.fromMillisecondsSinceEpoch(map['created_at'] as int),

@@ -130,6 +130,7 @@ class LocalRedemptionRepository implements RedemptionRepository {
         'amount': -req.totalCost,
         'type': PointsTxType.redeem.name,
         'status': ReviewStatus.approved.name,
+        'source': PointsTxSource.admin.name,
         'note': '兑换「${item.name}」x${req.quantity}',
         'operator_id': operatorId,
         'created_at': now,

@@ -10,6 +10,12 @@ abstract class PointsRepository {
     required int amount,
     String? note,
   });
+  Future<PointsTransaction> createByAdmin({
+    required int userId,
+    required int amount,
+    required int operatorId,
+    String? note,
+  });
   Future<void> approve(int txId, int operatorId);
   Future<void> reject(int txId, int operatorId, {String? reason});
 }
@@ -79,8 +85,43 @@ class LocalPointsRepository implements PointsRepository {
       'amount': amount,
       'type': amount > 0 ? PointsTxType.earn.name : PointsTxType.deduct.name,
       'status': ReviewStatus.pending.name,
+      'source': PointsTxSource.user.name,
       'note': note?.trim().isEmpty ?? true ? null : note!.trim(),
       'created_at': now,
+    });
+    return (await getById(id))!;
+  }
+
+  @override
+  Future<PointsTransaction> createByAdmin({
+    required int userId,
+    required int amount,
+    required int operatorId,
+    String? note,
+  }) async {
+    if (amount == 0) throw const PointsException('积分变动不能为 0');
+    final db = await _db.database;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final id = await db.transaction((txn) async {
+      final userRows = await txn.query('users', where: 'id = ?', whereArgs: [userId]);
+      if (userRows.isEmpty) throw const PointsException('关联用户不存在');
+      final currentPoints = userRows.first['points'] as int;
+      if (currentPoints + amount < 0) {
+        throw PointsException('用户当前积分 $currentPoints，扣减后为负，无法登记');
+      }
+      await txn.rawUpdate('UPDATE users SET points = points + ? WHERE id = ?', [amount, userId]);
+      final id = await txn.insert('points_transactions', {
+        'user_id': userId,
+        'amount': amount,
+        'type': amount > 0 ? PointsTxType.earn.name : PointsTxType.deduct.name,
+        'status': ReviewStatus.approved.name,
+        'source': PointsTxSource.admin.name,
+        'note': note?.trim().isEmpty ?? true ? null : note!.trim(),
+        'operator_id': operatorId,
+        'created_at': now,
+        'reviewed_at': now,
+      });
+      return id;
     });
     return (await getById(id))!;
   }

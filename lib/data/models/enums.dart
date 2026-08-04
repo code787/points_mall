@@ -6,6 +6,8 @@ enum ItemStatus { active, inactive }
 
 enum PointsTxType { earn, deduct, redeem }
 
+enum PointsTxSource { user, admin }
+
 enum ReviewStatus { pending, approved, rejected }
 
 extension UserRoleX on UserRole {
@@ -34,6 +36,13 @@ extension PointsTxTypeX on PointsTxType {
         PointsTxType.earn => '积分奖励',
         PointsTxType.deduct => '积分扣减',
         PointsTxType.redeem => '兑换消费',
+      };
+}
+
+extension PointsTxSourceX on PointsTxSource {
+  String get label => switch (this) {
+        PointsTxSource.user => '积分申请',
+        PointsTxSource.admin => '积分奖励',
       };
 }
 

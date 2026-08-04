@@ -115,7 +115,7 @@ class _TxTile extends StatelessWidget {
           color: color,
         ),
       ),
-      title: Text(tx.type.label, style: const TextStyle(fontWeight: FontWeight.w600)),
+      title: Text(tx.displayLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(
         '${formatDateTime(tx.createdAt)}${tx.note == null || tx.note!.isEmpty ? '' : ' · ${tx.note}'}',
         maxLines: 1,

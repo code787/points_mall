@@ -19,10 +19,17 @@ class DatabaseHelper {
     final path = p.join(dbPath, AppConstants.dbFileName);
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute("ALTER TABLE points_transactions ADD COLUMN source TEXT NOT NULL DEFAULT 'user'");
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -61,6 +68,7 @@ class DatabaseHelper {
         amount INTEGER NOT NULL,
         type TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending',
+        source TEXT NOT NULL DEFAULT 'user',
         note TEXT,
         operator_id INTEGER,
         created_at INTEGER NOT NULL,

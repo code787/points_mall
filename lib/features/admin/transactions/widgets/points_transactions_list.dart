@@ -15,45 +15,88 @@ class PointsTransactionsList extends ConsumerStatefulWidget {
 }
 
 class _PointsTransactionsListState extends ConsumerState<PointsTransactionsList> {
+  static const _categories = ['积分申请', '积分奖励', '积分扣减', '兑换消费'];
+
   ReviewStatus? _filter;
+  String? _category;
+  int? _userId;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final listAsync = ref.watch(allPointsTransactionsProvider);
+    final usersAsync = ref.watch(usersProvider);
 
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-          child: SizedBox(
-            height: 38,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _FilterChip(
-                  label: '全部',
-                  selected: _filter == null,
-                  onTap: () => setState(() => _filter = null),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: usersAsync.when(
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (users) {
+              final candidates = users.where((u) => !u.isAdmin).toList();
+              return DropdownButtonFormField<int?>(
+                initialValue: _userId,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  labelText: '按用户筛选',
+                  prefixIcon: Icon(Icons.person_search_outlined, size: 20),
                 ),
-                for (final s in ReviewStatus.values) ...[
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: s.label,
-                    selected: _filter == s,
-                    onTap: () => setState(() => _filter = s),
-                  ),
+                items: [
+                  const DropdownMenuItem(value: null, child: Text('全部用户')),
+                  for (final u in candidates)
+                    DropdownMenuItem(value: u.id, child: Text(u.displayName)),
                 ],
-              ],
-            ),
+                onChanged: (v) => setState(() => _userId = v),
+              );
+            },
           ),
+        ),
+        _chipRow(
+          children: [
+            _FilterChip(
+              label: '状态：全部',
+              selected: _filter == null,
+              onTap: () => setState(() => _filter = null),
+            ),
+            for (final s in ReviewStatus.values) ...[
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: s.label,
+                selected: _filter == s,
+                onTap: () => setState(() => _filter = s),
+              ),
+            ],
+          ],
+        ),
+        _chipRow(
+          children: [
+            _FilterChip(
+              label: '类别：全部',
+              selected: _category == null,
+              onTap: () => setState(() => _category = null),
+            ),
+            for (final c in _categories) ...[
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: c,
+                selected: _category == c,
+                onTap: () => setState(() => _category = c),
+              ),
+            ],
+          ],
         ),
         Expanded(
           child: listAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => EmptyState(icon: Icons.error_outline, title: '加载失败', subtitle: '$e'),
             data: (list) {
-              final filtered = _filter == null ? list : list.where((t) => t.status == _filter).toList();
+              var filtered = list;
+              if (_filter != null) filtered = filtered.where((t) => t.status == _filter).toList();
+              if (_category != null) filtered = filtered.where((t) => t.displayLabel == _category).toList();
+              if (_userId != null) filtered = filtered.where((t) => t.userId == _userId).toList();
               if (filtered.isEmpty) {
                 return const EmptyState(icon: Icons.receipt_long_outlined, title: '暂无流水');
               }
@@ -76,7 +119,7 @@ class _PointsTransactionsListState extends ConsumerState<PointsTransactionsList>
                         ),
                       ),
                       title: Text(
-                        '${tx.userName ?? '用户#${tx.userId}'} · ${tx.type.label}',
+                        '${tx.userName ?? '用户#${tx.userId}'} · ${tx.displayLabel}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontWeight: FontWeight.w600),
@@ -106,6 +149,19 @@ class _PointsTransactionsListState extends ConsumerState<PointsTransactionsList>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _chipRow({required List<Widget> children}) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: SizedBox(
+        height: 38,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: children,
+        ),
+      ),
     );
   }
 }

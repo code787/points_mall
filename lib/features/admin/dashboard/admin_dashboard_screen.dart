@@ -186,7 +186,7 @@ class _RecentTx extends StatelessWidget {
         color: color,
       ),
       title: Text(
-        '${tx.userName ?? '用户#${tx.userId}'} · ${tx.type.label}',
+        '${tx.userName ?? '用户#${tx.userId}'} · ${tx.displayLabel}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/formatters.dart';
-import '../../../../data/models/enums.dart';
 import '../../../../data/models/points_transaction.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../providers/feature_providers.dart';
@@ -106,7 +105,7 @@ class PointsReviewList extends ConsumerWidget {
                         Row(
                           children: [
                             Text(
-                              tx.type.label,
+                              tx.displayLabel,
                               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                             ),
                             const SizedBox(width: 8),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/validators.dart';
 import '../../../data/models/app_user.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/feature_providers.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../widgets/confirm_dialog.dart';
@@ -44,18 +45,22 @@ class _PointsRegistrationScreenState extends ConsumerState<PointsRegistrationScr
     }
     if (!_formKey.currentState!.validate()) return;
     final amount = (int.tryParse(_amountController.text.trim()) ?? 0) * (_isAdd ? 1 : -1);
+    final admin = ref.read(currentUserProvider);
+    if (admin == null) return;
     setState(() => _saving = true);
     try {
-      await ref.read(pointsRepoProvider).createRequest(
+      await ref.read(pointsRepoProvider).createByAdmin(
             userId: _userId!,
             amount: amount,
+            operatorId: admin.id,
             note: _noteController.text.trim(),
           );
-      ref.invalidate(pendingPointsProvider);
+      ref.invalidate(usersProvider);
+      ref.invalidate(statsProvider);
       ref.invalidate(allPointsTransactionsProvider);
       ref.invalidate(userPointsTransactionsProvider(_userId!));
       if (mounted) {
-        showSnack(context, '积分登记已提交，等待审核');
+        showSnack(context, '登记成功，积分已即时生效');
         Navigator.of(context).pop(true);
       }
     } on Exception catch (e) {
@@ -138,7 +143,7 @@ class _PointsRegistrationScreenState extends ConsumerState<PointsRegistrationScr
             ),
             const SizedBox(height: 12),
             Text(
-              '提交后需管理员审核通过才会实际增减积分',
+              '管理员登记即时生效，无需审核',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
             ),

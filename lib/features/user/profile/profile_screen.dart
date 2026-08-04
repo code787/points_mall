@@ -8,6 +8,7 @@ import '../../../providers/repository_providers.dart';
 import '../../../widgets/confirm_dialog.dart';
 import '../../../widgets/item_avatar.dart';
 import '../../../widgets/status_badge.dart';
+import 'sync_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -111,6 +112,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   title: const Text('修改密码'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: _changePassword,
+                ),
+                const Divider(indent: 16, endIndent: 16),
+                ListTile(
+                  leading: const Icon(Icons.sync_outlined),
+                  title: const Text('数据同步'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SyncScreen()),
+                  ),
                 ),
                 const Divider(indent: 16, endIndent: 16),
                 ListTile(

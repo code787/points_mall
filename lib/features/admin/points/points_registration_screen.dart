@@ -39,6 +39,7 @@ class _PointsRegistrationScreenState extends ConsumerState<PointsRegistrationScr
   }
 
   Future<void> _submit() async {
+    if (_saving) return;
     if (_userId == null) {
       showSnack(context, '请选择用户', isError: true);
       return;

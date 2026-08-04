@@ -28,6 +28,7 @@ class _PointsApplicationScreenState extends ConsumerState<PointsApplicationScree
   }
 
   Future<void> _submit() async {
+    if (_saving) return;
     final user = ref.read(currentUserProvider);
     if (user == null) return;
     if (!_formKey.currentState!.validate()) return;

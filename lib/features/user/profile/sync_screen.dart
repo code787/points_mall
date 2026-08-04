@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/sync/webdav_sync_service.dart';
 import '../../../main.dart' show syncService;
+import '../../../providers/auth_provider.dart';
 import '../../../widgets/confirm_dialog.dart';
 import 'sync_config_screen.dart';
 
-class SyncScreen extends StatefulWidget {
+class SyncScreen extends ConsumerStatefulWidget {
   const SyncScreen({super.key});
 
   @override
-  State<SyncScreen> createState() => _SyncScreenState();
+  ConsumerState<SyncScreen> createState() => _SyncScreenState();
 }
 
-class _SyncScreenState extends State<SyncScreen> {
+class _SyncScreenState extends ConsumerState<SyncScreen> {
   WebDAVConfig? _config;
   DateTime? _lastSync;
   bool _syncing = false;
@@ -104,6 +106,7 @@ class _SyncScreenState extends State<SyncScreen> {
     });
     try {
       await syncService.importData(_config!);
+      await ref.read(authControllerProvider).refreshUser();
       await _loadStatus();
       if (mounted) showSnack(context, '下载成功');
     } catch (e) {

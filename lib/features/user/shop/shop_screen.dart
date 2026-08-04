@@ -37,6 +37,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
   }
 
   Future<void> _submitRedemption(MallItem item, int quantity) async {
+    if (_submitting) return;
     final user = ref.read(currentUserProvider);
     if (user == null) return;
     setState(() => _submitting = true);

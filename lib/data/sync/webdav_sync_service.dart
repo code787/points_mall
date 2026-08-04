@@ -67,10 +67,13 @@ class WebDAVSyncService {
   Future<String?> testConnection(WebDAVConfig config) async {
     try {
       final url = Uri.parse(_normalizeUrl(config.url));
-      final response = await http.get(url, headers: _authHeaders(config)).timeout(const Duration(seconds: 15));
-      if (response.statusCode == 200 || response.statusCode == 207 || response.statusCode == 401) {
-        return response.statusCode == 401 ? '用户名或密码错误' : null;
-      }
+      final headers = Map<String, String>.from(_authHeaders(config))..['Depth'] = '0';
+      final request = http.Request('PROPFIND', url)..headers.addAll(headers);
+      final response = await request.send().timeout(const Duration(seconds: 15));
+      final body = await response.stream.bytesToString();
+      if (response.statusCode == 401) return '用户名或密码错误';
+      if (response.statusCode == 200 || response.statusCode == 207) return null;
+      if (body.contains('OperationNotAllowed')) return 'WebDAV 未开启';
       return 'HTTP ${response.statusCode}';
     } catch (e) {
       return e.toString();
@@ -95,7 +98,8 @@ class WebDAVSyncService {
     final fileUrl = Uri.parse('$baseUrl$_syncFolder/$_syncFile');
     final headers = _authHeaders(config);
 
-    final mkResponse = await http.Request('MKCOL', folderUrl).send();
+    final mkRequest = http.Request('MKCOL', folderUrl)..headers.addAll(headers);
+    final mkResponse = await mkRequest.send();
     await mkResponse.stream.drain();
 
     final putResponse = await http.put(fileUrl, headers: headers, body: body).timeout(const Duration(seconds: 30));

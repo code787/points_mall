@@ -73,6 +73,7 @@ class LocalItemRepository implements ItemRepository {
       'created_at': now,
       'updated_at': now,
     });
+    await _db.notifyDataChanged();
     return (await getById(id))!;
   }
 
@@ -91,6 +92,7 @@ class LocalItemRepository implements ItemRepository {
       'status': item.status.name,
       'updated_at': DateTime.now().millisecondsSinceEpoch,
     }, where: 'id = ?', whereArgs: [item.id]);
+    await _db.notifyDataChanged();
   }
 
   @override
@@ -100,6 +102,7 @@ class LocalItemRepository implements ItemRepository {
       'status': status.name,
       'updated_at': DateTime.now().millisecondsSinceEpoch,
     }, where: 'id = ?', whereArgs: [id]);
+    await _db.notifyDataChanged();
   }
 
   @override
@@ -107,5 +110,6 @@ class LocalItemRepository implements ItemRepository {
     final db = await _db.database;
     await db.rawUpdate('UPDATE items SET stock = stock + ?, updated_at = ? WHERE id = ?',
         [delta, DateTime.now().millisecondsSinceEpoch, id]);
+    await _db.notifyDataChanged();
   }
 }

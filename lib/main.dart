@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
+import 'data/local/database_helper.dart';
 import 'data/sync/webdav_sync_service.dart';
+
+late final WebDAVSyncService syncService;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Auto-sync on startup
+  syncService = WebDAVSyncService();
+  DatabaseHelper.instance.onDataChanged = syncService.syncNow;
   await _autoSync();
 
   runApp(const ProviderScope(child: PointsMallApp()));
@@ -15,16 +19,13 @@ void main() async {
 
 Future<void> _autoSync() async {
   try {
-    final syncService = WebDAVSyncService();
     final config = await syncService.loadConfig();
     if (config.isConfigured) {
-      // Try to acquire lock (will fail if another device is syncing)
       await syncService.startSession(config);
-      // Import data from cloud
       await syncService.importData(config);
-      await syncService.endSession(config);
+      // Lock stays alive via heartbeat, released when app closes
     }
   } catch (e) {
-    // Ignore auto-sync errors (network issues, lock conflicts, etc.)
+    // Ignore auto-sync errors
   }
 }

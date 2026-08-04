@@ -83,6 +83,7 @@ class LocalUserRepository implements UserRepository {
       'status': UserStatus.active.name,
       'created_at': DateTime.now().millisecondsSinceEpoch,
     });
+    await _db.notifyDataChanged();
     return (await getById(id))!;
   }
 
@@ -95,17 +96,20 @@ class LocalUserRepository implements UserRepository {
       'points': user.points,
       'status': user.status.name,
     }, where: 'id = ?', whereArgs: [user.id]);
+    await _db.notifyDataChanged();
   }
 
   @override
   Future<void> setStatus(int id, UserStatus status) async {
     final db = await _db.database;
     await db.update('users', {'status': status.name}, where: 'id = ?', whereArgs: [id]);
+    await _db.notifyDataChanged();
   }
 
   @override
   Future<void> resetPassword(int id, String newPassword) async {
     final db = await _db.database;
     await db.update('users', {'password_hash': hashPassword(newPassword)}, where: 'id = ?', whereArgs: [id]);
+    await _db.notifyDataChanged();
   }
 }

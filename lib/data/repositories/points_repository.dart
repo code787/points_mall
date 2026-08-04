@@ -89,6 +89,7 @@ class LocalPointsRepository implements PointsRepository {
       'note': note?.trim().isEmpty ?? true ? null : note!.trim(),
       'created_at': now,
     });
+    await _db.notifyDataChanged();
     return (await getById(id))!;
   }
 
@@ -123,6 +124,7 @@ class LocalPointsRepository implements PointsRepository {
       });
       return id;
     });
+    await _db.notifyDataChanged();
     return (await getById(id))!;
   }
 
@@ -147,6 +149,7 @@ class LocalPointsRepository implements PointsRepository {
         'reviewed_at': DateTime.now().millisecondsSinceEpoch,
       }, where: 'id = ?', whereArgs: [txId]);
     });
+    await _db.notifyDataChanged();
   }
 
   @override
@@ -167,5 +170,6 @@ class LocalPointsRepository implements PointsRepository {
         'note': [tx.note, note].whereType<String>().join(' | '),
       }, where: 'id = ?', whereArgs: [txId]);
     });
+    await _db.notifyDataChanged();
   }
 }

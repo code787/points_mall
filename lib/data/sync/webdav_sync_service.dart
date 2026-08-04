@@ -254,6 +254,16 @@ class WebDAVSyncService {
     await _updateLastSyncTime();
   }
 
+  Future<void> syncNow() async {
+    try {
+      final config = await loadConfig();
+      if (!config.isConfigured) return;
+      await exportData(config);
+    } catch (e) {
+      // Ignore sync errors
+    }
+  }
+
   void dispose() {
     stopHeartbeat();
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/sync/webdav_sync_service.dart';
+import '../../../main.dart' show syncService;
 import '../../../widgets/confirm_dialog.dart';
 import 'sync_config_screen.dart';
 
@@ -12,7 +13,6 @@ class SyncScreen extends StatefulWidget {
 }
 
 class _SyncScreenState extends State<SyncScreen> {
-  final _syncService = WebDAVSyncService();
   WebDAVConfig? _config;
   DateTime? _lastSync;
   bool _syncing = false;
@@ -24,15 +24,9 @@ class _SyncScreenState extends State<SyncScreen> {
     _loadStatus();
   }
 
-  @override
-  void dispose() {
-    _syncService.dispose();
-    super.dispose();
-  }
-
   Future<void> _loadStatus() async {
-    final config = await _syncService.loadConfig();
-    final lastSync = await _syncService.getLastSyncTime();
+    final config = await syncService.loadConfig();
+    final lastSync = await syncService.getLastSyncTime();
     setState(() {
       _config = config;
       _lastSync = lastSync;
@@ -46,10 +40,10 @@ class _SyncScreenState extends State<SyncScreen> {
     }
 
     // Check lock
-    final lock = await _syncService.checkLock(_config!);
+    final lock = await syncService.checkLock(_config!);
     if (lock != null) {
       if (mounted) {
-        final remaining = _syncService.remainingMinutes(lock);
+        final remaining = syncService.remainingMinutes(lock);
         showSnack(context, '其他设备正在同步，请$remaining分钟后再试', isError: true);
       }
       return;
@@ -69,7 +63,7 @@ class _SyncScreenState extends State<SyncScreen> {
       _status = '正在上传...';
     });
     try {
-      await _syncService.exportData(_config!);
+      await syncService.exportData(_config!);
       await _loadStatus();
       if (mounted) showSnack(context, '上传成功');
     } catch (e) {
@@ -86,10 +80,10 @@ class _SyncScreenState extends State<SyncScreen> {
     }
 
     // Check lock
-    final lock = await _syncService.checkLock(_config!);
+    final lock = await syncService.checkLock(_config!);
     if (lock != null) {
       if (mounted) {
-        final remaining = _syncService.remainingMinutes(lock);
+        final remaining = syncService.remainingMinutes(lock);
         showSnack(context, '其他设备正在同步，请$remaining分钟后再试', isError: true);
       }
       return;
@@ -109,7 +103,7 @@ class _SyncScreenState extends State<SyncScreen> {
       _status = '正在下载...';
     });
     try {
-      await _syncService.importData(_config!);
+      await syncService.importData(_config!);
       await _loadStatus();
       if (mounted) showSnack(context, '下载成功');
     } catch (e) {

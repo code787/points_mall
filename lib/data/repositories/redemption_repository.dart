@@ -98,6 +98,7 @@ class LocalRedemptionRepository implements RedemptionRepository {
       'note': note?.trim().isEmpty ?? true ? null : note!.trim(),
       'created_at': DateTime.now().millisecondsSinceEpoch,
     });
+    await _db.notifyDataChanged();
     return (await getById(id))!;
   }
 
@@ -147,6 +148,7 @@ class LocalRedemptionRepository implements RedemptionRepository {
         'points_tx_id': txId,
       }, where: 'id = ?', whereArgs: [requestId]);
     });
+    await _db.notifyDataChanged();
   }
 
   @override
@@ -165,5 +167,6 @@ class LocalRedemptionRepository implements RedemptionRepository {
         'note': [req.note, note].whereType<String>().join(' | '),
       }, where: 'id = ?', whereArgs: [requestId]);
     });
+    await _db.notifyDataChanged();
   }
 }

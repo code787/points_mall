@@ -9,6 +9,19 @@ class DatabaseHelper {
 
   Database? _db;
 
+  Future<void> Function()? onDataChanged;
+
+  Future<void> notifyDataChanged() async {
+    final callback = onDataChanged;
+    if (callback != null) {
+      try {
+        await callback();
+      } catch (_) {
+        // ignore sync errors
+      }
+    }
+  }
+
   Future<Database> get database async {
     _db ??= await _open();
     return _db!;

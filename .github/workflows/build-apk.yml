@@ -43,9 +43,9 @@ jobs:
       - name: Build APK (release, arm64-v8a)
         run: flutter build apk --release --target-platform android-arm64 -PversionCode=$VERSION_CODE -PversionName=$VERSION_NAME
         env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: c3e1a6b62ef468645c20b963306bb0d6
+          KEY_ALIAS: points_mall
+          KEY_PASSWORD: c3e1a6b62ef468645c20b963306bb0d6
 
       - name: Upload APKs
         uses: actions/upload-artifact@v4

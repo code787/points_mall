@@ -10,6 +10,8 @@ class AppConstants {
   static const List<String> itemEmojis = [
     '🎁', '🏆', '🎧', '📱', '⌚', '👕', '☕', '📚',
     '🎮', '💄', '🎒', '🧸', '🖱️', '💻', '🔋', '🧴',
+    '🍪', '🍫', '🍬', '🥤', '🧃', '🥛', '🍩', '🧁',
+    '🍿', '🥤', '🍦', '🍰', '🫖', '🍵', '🧋', '🍝',
   ];
 
   static const List<ColorValue> itemColors = [

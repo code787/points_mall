@@ -180,6 +180,17 @@ class _SyncScreenState extends State<SyncScreen> {
                 label: const Text('从坚果云下载'),
               ),
             ),
+            if (configured) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _openConfig,
+                  icon: const Icon(Icons.settings_outlined),
+                  label: const Text('修改配置'),
+                ),
+              ),
+            ],
           ],
           const SizedBox(height: 16),
           Card(

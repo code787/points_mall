@@ -28,7 +28,7 @@ class SyncLock {
 
   const SyncLock({required this.deviceId, required this.timestamp});
 
-  bool get isExpired => DateTime.now().millisecondsSinceEpoch - timestamp > 5 * 60 * 1000;
+  bool get isExpired => DateTime.now().millisecondsSinceEpoch - timestamp > 3 * 60 * 1000;
 
   factory SyncLock.fromJson(String json) {
     final map = jsonDecode(json);
@@ -48,7 +48,7 @@ class WebDAVSyncService {
   static const _syncFile = 'points_mall.db';
   static const _lockFile = 'points_mall.lock';
   static const _heartbeatInterval = Duration(minutes: 1);
-  static const _lockTimeout = Duration(minutes: 5);
+  static const _lockTimeout = Duration(minutes: 3);
 
   Timer? _heartbeatTimer;
   String? _currentDeviceId;

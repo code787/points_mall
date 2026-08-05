@@ -82,16 +82,6 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
       return;
     }
 
-    // Check lock
-    final lock = await syncService.checkLock(_config!);
-    if (lock != null) {
-      if (mounted) {
-        final remaining = syncService.remainingMinutes(lock);
-        showSnack(context, '其他设备正在同步，请$remaining分钟后再试', isError: true);
-      }
-      return;
-    }
-
     if (!mounted) return;
     final ok = await confirmDialog(
       context,
